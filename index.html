@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>四六级在线练习系统</title>
+    <title>四六级在线练习系统（20题版）</title>
     <style>
         * {
             box-sizing: border-box;
@@ -12,7 +12,7 @@
             font-family: system-ui, sans-serif;
         }
         body {
-            max-width: 800px;
+            max-width: 850px;
             margin: 30px auto;
             padding: 0 20px;
         }
@@ -21,6 +21,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom:20px;
+            flex-wrap: wrap;
+            gap:10px;
         }
         .timer {
             font-size:18px;
@@ -58,6 +60,7 @@
             display:flex;
             gap:12px;
             margin-top:20px;
+            flex-wrap: wrap;
         }
         button{
             padding:10px 18px;
@@ -85,6 +88,10 @@
             font-size:14px;
             line-height:1.7;
         }
+        .nav-info{
+            margin-bottom:10px;
+            color:#555;
+        }
     </style>
 </head>
 <body>
@@ -92,6 +99,7 @@
         <h2>四六级在线练习系统</h2>
         <div class="timer">剩余时间：<span id="time">120:00</span></div>
     </div>
+    <div class="nav-info">题目：<span id="pageInfo">1 / 20</span></div>
 
     <div class="card">
         <div class="question-title" id="question"></div>
@@ -104,40 +112,174 @@
     </div>
 
     <div class="result" id="resultBox">
-        <h3>考试结果</h3>
-        <p>得分：<span id="score"></span></p>
+        <h3>✅ 答题结果</h3>
+        <p>总题数：20题，你的得分：<span id="score"></span> 分（每题5分，满分100）</p>
+        <h4>❌ 错题解析：</h4>
         <div class="error-list" id="errorList"></div>
     </div>
 
 <script>
-// 题库样例，你后续可以继续追加题目
+// ====== 20道四六级题库（词汇+阅读单选）======
 const questionBank = [
     {
         id: 1,
-        type: "仔细阅读",
-        title: "Many people believe that international tourism is bad for their countries. What is your opinion?",
-        question: "What is the main concern of some people towards international tourism?",
-        options:{
-            A:"It brings cultural pollution and damages local environment",
-            B:"It creates many job opportunities",
-            C:"It improves local transportation",
-            D:"It helps cultural communication"
-        },
+        type: "词汇",
+        question: "The new policy is designed to ______ the economic growth.",
+        options:{A:"stimulate",B:"survive",C:"simplify",D:"suspect"},
         answer:"A",
-        explain:"部分民众认为入境旅游会带来外来文化冲击，破坏本地生态环境，所以选择A。"
+        explain:"stimulate growth 刺激经济增长；survive幸存，simplify简化，suspect怀疑。"
     },
     {
         id:2,
-        type:"词汇单选",
-        question:"The company decided to ______ a new policy to protect employee rights.",
-        options:{
-            A:"adapt",
-            B:"adopt",
-            C:"adjust",
-            D:"admit"
-        },
+        type:"词汇",
+        question:"Many young people ______ great importance to work-life balance.",
+        options:{A:"attach",B:"attain",C:"attract",D:"attend"},
+        answer:"A",
+        explain:"固定搭配 attach importance to：重视..."
+    },
+    {
+        id:3,
+        type:"词汇",
+        question:"We need to ______ the risk before making the final decision.",
+        options:{A:"value",B:"evaluate",C:"evolve",D:"evoke"},
         answer:"B",
-        explain:"adopt policy：采纳政策；adapt适应，adjust调整，admit承认。"
+        explain:"evaluate 评估；value珍惜，evolve进化，evoke唤起。"
+    },
+    {
+        id:4,
+        type:"词汇",
+        question:"The report ______ that pollution is still a serious problem.",
+        options:{A:"illustrates",B:"imagines",C:"ignores",D:"imitates"},
+        answer:"A",
+        explain:"illustrate 说明、阐明；imagine想象，ignore忽视，imitate模仿。"
+    },
+    {
+        id:5,
+        type:"词汇",
+        question:"People are ______ to changes in their daily environment.",
+        options:{A:"sensitive",B:"sensible",C:"serious",D:"separate"},
+        answer:"A",
+        explain:"be sensitive to：对…敏感；sensible明智的。"
+    },
+    {
+        id:6,
+        type:"词汇",
+        question:"The company will ______ the project due to limited budget.",
+        options:{A:"cancel",B:"conceal",C:"confirm",D:"contain"},
+        answer:"A",
+        explain:"cancel project 取消项目；conceal隐藏，confirm确认，contain包含。"
+    },
+    {
+        id:7,
+        type:"词汇",
+        question:"Hard work can ______ to your final success.",
+        options:{A:"contribute",B:"convert",C:"control",D:"convey"},
+        answer:"A",
+        explain:"contribute to：促成，有助于。固定短语。"
+    },
+    {
+        id:8,
+        type:"词汇",
+        question:"She tried to ______ her nervousness before the interview.",
+        options:{A:"overcome",B:"overtake",C:"overlook",D:"overrun"},
+        answer:"A",
+        explain:"overcome nervousness 克服紧张；overtake追上，overlook忽视。"
+    },
+    {
+        id:9,
+        type:"词汇",
+        question:"It is ______ to protect wild animals from extinction.",
+        options:{A:"vital",B:"virtual",C:"visible",D:"violent"},
+        answer:"A",
+        explain:"vital 至关重要的；virtual虚拟的，visible可见的。"
+    },
+    {
+        id:10,
+        type:"词汇",
+        question:"The professor asked us to ______ the data carefully.",
+        options:{A:"analyze",B:"announce",C:"annoy",D:"approve"},
+        answer:"A",
+        explain:"analyze data 分析数据；announce宣布，annoy使烦恼，approve批准。"
+    },
+    {
+        id:11,
+        type:"阅读单选",
+        question:"Many cities encourage public transport to reduce carbon emission. What is the main purpose?",
+        options:{A:"Cut air pollution",B:"Increase income",C:"Build more roads",D:"Create more jobs"},
+        answer:"A",
+        explain:"公共交通的目标是减少碳排放，降低空气污染。"
+    },
+    {
+        id:12,
+        type:"阅读单选",
+        question:"Online learning breaks the limit of ______, so learners can study anytime.",
+        options:{A:"time and space",B:"money",C:"age",D:"exam"},
+        answer:"A",
+        explain:"线上学习打破时间与空间限制，可以随时学习。"
+    },
+    {
+        id:13,
+        type:"阅读单选",
+        question:"What benefit can reading bring to people?",
+        options:{A:"Broaden horizons",B:"Increase sleep time",C:"Reduce exercise",D:"Raise cost"},
+        answer:"A",
+        explain:"读书可以拓宽视野 broaden horizons。"
+    },
+    {
+        id:14,
+        type:"阅读单选",
+        question:"Why do many companies prefer team work?",
+        options:{A:"Combine different strengths",B:"Save office space",C:"Reduce meetings",D:"Cut employees"},
+        answer:"A",
+        explain:"团队合作可以整合每个人不同优势，提升效率。"
+    },
+    {
+        id:15,
+        type:"阅读单选",
+        question:"People choose reusable bags mainly to ______.",
+        options:{A:"protect environment",B:"save money only",C:"carry heavier goods",D:"look fashionable"},
+        answer:"A",
+        explain:"可重复使用袋子主要目的是保护环境，减少塑料污染。"
+    },
+    {
+        id:16,
+        type:"阅读单选",
+        question:"Regular exercise helps people ______ their physical health.",
+        options:{A:"improve",B:"ignore",C:"limit",D:"waste"},
+        answer:"A",
+        explain:"improve physical health 改善身体健康。"
+    },
+    {
+        id:17,
+        type:"阅读单选",
+        question:"What is the advantage of face-to-face communication?",
+        options:{A:"Express emotion directly",B:"No time cost",C:"No need to talk",D:"No distance limit"},
+        answer:"A",
+        explain:"面对面沟通可以直接表达情绪，传递肢体表情。"
+    },
+    {
+        id:18,
+        type:"阅读单选",
+        question:"Urban green space can help ______ the temperature in summer.",
+        options:{A:"lower",B:"rise",C:"keep",D:"change"},
+        answer:"A",
+        explain:"城市绿地可以降低夏季气温，缓解热岛效应。"
+    },
+    {
+        id:19,
+        type:"阅读单选",
+        question:"To improve writing skills, students need to ______ frequently.",
+        options:{A:"practice",B:"rest",C:"skip homework",D:"watch videos"},
+        answer:"A",
+        explain:"想要提升写作，必须经常性练习 practice。"
+    },
+    {
+        id:20,
+        type:"阅读单选",
+        question:"Why is lifelong learning important in modern society?",
+        options:{A:"Keep up with rapid changes",B:"Avoid all work",C:"Get money quickly",D:"Stop thinking"},
+        answer:"A",
+        explain:"现代社会变化快，终身学习可以跟上时代发展。"
     }
 ];
 
@@ -147,7 +289,7 @@ let timerMin = 120;
 let timerSec = 0;
 let timer = null;
 
-// 初始化计时
+// 计时器
 function startTimer(){
     timer = setInterval(()=>{
         if(timerSec === 0){
@@ -167,7 +309,8 @@ function startTimer(){
 // 渲染题目
 function render(){
     const q = questionBank[currentIndex];
-    document.getElementById("question").innerText = `${q.id}. ${q.question}`;
+    document.getElementById("pageInfo").innerText = `${currentIndex+1} / ${questionBank.length}`;
+    document.getElementById("question").innerText = `${q.id}.【${q.type}】${q.question}`;
     const optBox = document.getElementById("options-box");
     optBox.innerHTML = "";
     for(let key in q.options){
@@ -183,41 +326,44 @@ function render(){
     }
 }
 
-// 交卷阅卷
+// 交卷、判分、错题分析
 function submitPaper(){
     clearInterval(timer);
     let score = 0;
     let errorHtml = "";
     questionBank.forEach((item,idx)=>{
         if(userAnswers[idx] === item.answer){
-            score += 10;
+            score += 5;
         }else{
-            errorHtml += `<p>第${item.id}题：你的答案${userAnswers[idx]},正确答案${item.answer}，${item.explain}</p>`;
+            const userAns = userAnswers[idx] ? userAnswers[idx] : "未作答";
+            errorHtml += `<p>第${item.id}题：你的答案：${userAns}｜正确答案：${item.answer}<br>解析：${item.explain}</p>`;
         }
     })
     document.getElementById("score").innerText = score;
     document.getElementById("errorList").innerHTML = errorHtml;
     document.getElementById("resultBox").style.display = "block";
-    // 错题存入localStorage
     saveErrorRecord(questionBank,userAnswers);
 }
 
-// 本地存储错题
+// 本地存储错题（LocalStorage）
 function saveErrorRecord(questions, answers){
     let oldData = JSON.parse(localStorage.getItem("cetError")) || [];
     questions.forEach((q,i)=>{
         if(answers[i] && answers[i]!== q.answer){
             oldData.push({
                 id:q.id,
-                q:q.question,
+                type:q.type,
+                question:q.question,
                 userAns:answers[i],
-                rightAns:q.answer
+                rightAns:q.answer,
+                explain:q.explain
             })
         }
     })
     localStorage.setItem("cetError",JSON.stringify(oldData));
 }
 
+// 切换题目
 document.getElementById("next").onclick = ()=>{
     if(currentIndex < questionBank.length -1){
         currentIndex++; render();
@@ -230,7 +376,7 @@ document.getElementById("prev").onclick = ()=>{
 }
 document.getElementById("submit").onclick = submitPaper;
 
-// 启动
+// 初始化页面
 render();
 startTimer();
 </script>
