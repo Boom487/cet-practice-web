@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四六级在线练习系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, sans-serif;
+        }
+        body {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom:20px;
+        }
+        .timer {
+            font-size:18px;
+            color:#c0392b;
+            font-weight:bold;
+        }
+        .card{
+            border:1px solid #ddd;
+            border-radius:12px;
+            padding:24px;
+            margin-bottom:20px;
+        }
+        .question-title{
+            font-size:18px;
+            margin-bottom:16px;
+            line-height:1.6;
+        }
+        .option{
+            padding:12px 16px;
+            border:1px solid #ccc;
+            border-radius:8px;
+            margin:10px 0;
+            cursor:pointer;
+            transition: 0.2s;
+        }
+        .option:hover{
+            background-color:#f0f8ff;
+        }
+        .option.selected{
+            background-color:#3498db;
+            color:white;
+            border-color:#3498db;
+        }
+        .btn-group{
+            display:flex;
+            gap:12px;
+            margin-top:20px;
+        }
+        button{
+            padding:10px 18px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-size:16px;
+        }
+        #submit{
+            background:#27ae60;
+            color:white;
+        }
+        #prev, #next{
+            background:#ecf0f1;
+        }
+        .result{
+            margin-top:20px;
+            padding:16px;
+            background:#f8f9fa;
+            border-radius:8px;
+            display:none;
+        }
+        .error-list{
+            margin-top:12px;
+            font-size:14px;
+            line-height:1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>四六级在线练习系统</h2>
+        <div class="timer">剩余时间：<span id="time">120:00</span></div>
+    </div>
+
+    <div class="card">
+        <div class="question-title" id="question"></div>
+        <div id="options-box"></div>
+        <div class="btn-group">
+            <button id="prev">上一题</button>
+            <button id="next">下一题</button>
+            <button id="submit">交卷阅卷</button>
+        </div>
+    </div>
+
+    <div class="result" id="resultBox">
+        <h3>考试结果</h3>
+        <p>得分：<span id="score"></span></p>
+        <div class="error-list" id="errorList"></div>
+    </div>
+
+<script>
+// 题库样例，你后续可以继续追加题目
+const questionBank = [
+    {
+        id: 1,
+        type: "仔细阅读",
+        title: "Many people believe that international tourism is bad for their countries. What is your opinion?",
+        question: "What is the main concern of some people towards international tourism?",
+        options:{
+            A:"It brings cultural pollution and damages local environment",
+            B:"It creates many job opportunities",
+            C:"It improves local transportation",
+            D:"It helps cultural communication"
+        },
+        answer:"A",
+        explain:"部分民众认为入境旅游会带来外来文化冲击，破坏本地生态环境，所以选择A。"
+    },
+    {
+        id:2,
+        type:"词汇单选",
+        question:"The company decided to ______ a new policy to protect employee rights.",
+        options:{
+            A:"adapt",
+            B:"adopt",
+            C:"adjust",
+            D:"admit"
+        },
+        answer:"B",
+        explain:"adopt policy：采纳政策；adapt适应，adjust调整，admit承认。"
+    }
+];
+
+let currentIndex = 0;
+let userAnswers = Array(questionBank.length).fill(null);
+let timerMin = 120;
+let timerSec = 0;
+let timer = null;
+
+// 初始化计时
+function startTimer(){
+    timer = setInterval(()=>{
+        if(timerSec === 0){
+            timerMin--;
+            timerSec = 59;
+        }else{
+            timerSec--;
+        }
+        document.getElementById("time").innerText = `${timerMin}:${String(timerSec).padStart(2,'0')}`;
+        if(timerMin <=0 && timerSec <=0){
+            clearInterval(timer);
+            submitPaper();
+        }
+    },1000);
+}
+
+// 渲染题目
+function render(){
+    const q = questionBank[currentIndex];
+    document.getElementById("question").innerText = `${q.id}. ${q.question}`;
+    const optBox = document.getElementById("options-box");
+    optBox.innerHTML = "";
+    for(let key in q.options){
+        const div = document.createElement("div");
+        div.className = "option";
+        if(userAnswers[currentIndex] === key) div.classList.add("selected");
+        div.innerText = `${key}. ${q.options[key]}`;
+        div.onclick = ()=>{
+            userAnswers[currentIndex] = key;
+            render();
+        }
+        optBox.appendChild(div);
+    }
+}
+
+// 交卷阅卷
+function submitPaper(){
+    clearInterval(timer);
+    let score = 0;
+    let errorHtml = "";
+    questionBank.forEach((item,idx)=>{
+        if(userAnswers[idx] === item.answer){
+            score += 10;
+        }else{
+            errorHtml += `<p>第${item.id}题：你的答案${userAnswers[idx]},正确答案${item.answer}，${item.explain}</p>`;
+        }
+    })
+    document.getElementById("score").innerText = score;
+    document.getElementById("errorList").innerHTML = errorHtml;
+    document.getElementById("resultBox").style.display = "block";
+    // 错题存入localStorage
+    saveErrorRecord(questionBank,userAnswers);
+}
+
+// 本地存储错题
+function saveErrorRecord(questions, answers){
+    let oldData = JSON.parse(localStorage.getItem("cetError")) || [];
+    questions.forEach((q,i)=>{
+        if(answers[i] && answers[i]!== q.answer){
+            oldData.push({
+                id:q.id,
+                q:q.question,
+                userAns:answers[i],
+                rightAns:q.answer
+            })
+        }
+    })
+    localStorage.setItem("cetError",JSON.stringify(oldData));
+}
+
+document.getElementById("next").onclick = ()=>{
+    if(currentIndex < questionBank.length -1){
+        currentIndex++; render();
+    }
+}
+document.getElementById("prev").onclick = ()=>{
+    if(currentIndex>0){
+        currentIndex--; render();
+    }
+}
+document.getElementById("submit").onclick = submitPaper;
+
+// 启动
+render();
+startTimer();
+</script>
+</body>
+</html>
